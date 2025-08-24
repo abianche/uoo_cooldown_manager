@@ -18,5 +18,6 @@ export function parseCooldowns(xml: string): Cooldowns {
 }
 
 export function buildCooldowns(data: Cooldowns): string {
-  return builder.build(data);
+  const xmlContent = builder.build(data);
+  return `<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n${xmlContent}`;
 }
