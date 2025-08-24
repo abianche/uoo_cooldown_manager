@@ -11,6 +11,8 @@ import {
   updateEntry,
   deleteEntry,
   reorderEntries,
+  updateGeneralSettings,
+  initializeData,
 } from "./store";
 import {
   Container,
@@ -20,7 +22,7 @@ import {
   useMantineColorScheme,
   Group,
 } from "@mantine/core";
-import { CooldownList, FileUpload } from "./components";
+import { CooldownList, FileUpload, GeneralSettingsPanel } from "./components";
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,6 +38,7 @@ export default function App() {
         try {
           const parsed = parseCooldowns(xml);
           dispatch(setData(parsed));
+          dispatch(initializeData());
         } catch {
           /* ignore */
         }
@@ -49,6 +52,7 @@ export default function App() {
       try {
         const parsed = parseCooldowns(reader.result as string);
         dispatch(setData(parsed));
+        dispatch(initializeData());
         dispatch(setError(null));
       } catch (e) {
         dispatch(setError("Failed to parse XML"));
@@ -66,6 +70,9 @@ export default function App() {
 
   const onReorderEntries = (fromIndex: number, toIndex: number) =>
     dispatch(reorderEntries({ fromIndex, toIndex }));
+
+  const onUpdateGeneralSettings = (settings: any) =>
+    dispatch(updateGeneralSettings(settings));
 
   const download = () => {
     if (!data) return;
@@ -111,14 +118,20 @@ export default function App() {
         </Group>
         <FileUpload onFileSelect={handleFile} error={error} />
         {data && (
-          <CooldownList
-            entries={data.cooldowns.cooldownentry}
-            onAddEntry={onAddEntry}
-            onUpdateEntry={onUpdateEntry}
-            onDeleteEntry={onDeleteEntry}
-            onReorderEntries={onReorderEntries}
-            onDownload={download}
-          />
+          <>
+            <GeneralSettingsPanel
+              settings={data.cooldowns.generalsettings}
+              onChange={onUpdateGeneralSettings}
+            />
+            <CooldownList
+              entries={data.cooldowns.cooldownentry}
+              onAddEntry={onAddEntry}
+              onUpdateEntry={onUpdateEntry}
+              onDeleteEntry={onDeleteEntry}
+              onReorderEntries={onReorderEntries}
+              onDownload={download}
+            />
+          </>
         )}
       </Stack>
     </Container>

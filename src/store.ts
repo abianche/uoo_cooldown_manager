@@ -1,5 +1,5 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Cooldowns, CooldownEntry } from "./types";
+import { Cooldowns, CooldownEntry, GeneralSettings } from "./types";
 
 interface CooldownState {
   data: Cooldowns | null;
@@ -24,6 +24,16 @@ const cooldownSlice = createSlice({
     },
     addEntry(state) {
       if (!state.data) return;
+
+      // Ensure general settings exist
+      if (!state.data.cooldowns.generalsettings) {
+        state.data.cooldowns.generalsettings = {
+          showCooldownGump: true,
+          cooldownBarHeight: 20,
+          cooldownBarWidth: 200,
+        };
+      }
+
       state.data.cooldowns.cooldownentry.push({
         name: "",
         defaultcooldown: 0,
@@ -56,6 +66,27 @@ const cooldownSlice = createSlice({
       entries.splice(toIndex, 0, movedEntry);
       state.data.cooldowns.cooldownentry = entries;
     },
+    updateGeneralSettings(
+      state,
+      action: PayloadAction<Partial<GeneralSettings>>
+    ) {
+      if (!state.data) return;
+      state.data.cooldowns.generalsettings = {
+        ...state.data.cooldowns.generalsettings,
+        ...action.payload,
+      };
+    },
+    initializeData(state) {
+      if (!state.data) return;
+      // Ensure general settings exist with defaults
+      if (!state.data.cooldowns.generalsettings) {
+        state.data.cooldowns.generalsettings = {
+          showCooldownGump: true,
+          cooldownBarHeight: 20,
+          cooldownBarWidth: 200,
+        };
+      }
+    },
   },
 });
 
@@ -66,6 +97,8 @@ export const {
   updateEntry,
   deleteEntry,
   reorderEntries,
+  updateGeneralSettings,
+  initializeData,
 } = cooldownSlice.actions;
 
 export const store = configureStore({
