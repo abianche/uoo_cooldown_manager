@@ -149,7 +149,12 @@ export function EntryEditor({
         </Group>
         <Collapse in={triggersOpen}>
           {entry.trigger.map((t, i) => (
-            <Paper key={i} withBorder p="xs" style={{ borderStyle: "dashed" }}>
+            <Paper
+              key={`${t.triggertype}-${i}`}
+              withBorder
+              p="xs"
+              style={{ borderStyle: "dashed" }}
+            >
               <Group gap="md" align="flex-end">
                 <Select
                   label="Type"
