@@ -7,6 +7,7 @@ import {
   Text,
   Paper,
   Collapse,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { CooldownEntry } from "../types";
 import { EntryEditor } from "./EntryEditor";
@@ -29,6 +30,7 @@ export function CooldownList({
   onDownload,
 }: CooldownListProps) {
   const [expandedEntry, setExpandedEntry] = useState<number | null>(null);
+  const { colorScheme } = useMantineColorScheme();
 
   const moveEntry = (fromIndex: number, direction: "up" | "down") => {
     const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
@@ -43,14 +45,33 @@ export function CooldownList({
 
   return (
     <Stack>
-      <Button onClick={onAddEntry}>Add Entry</Button>
+      <Button 
+        onClick={onAddEntry}
+        style={{
+          backgroundColor: colorScheme === 'dark' 
+            ? 'var(--mantine-color-blue-8)' 
+            : 'var(--mantine-color-blue-6)',
+        }}
+      >
+        Add Entry
+      </Button>
       {entries.length > 0 && (
         <Text size="sm" c="dimmed" ta="center">
           Click on an entry name to edit, use arrows to reorder
         </Text>
       )}
       {entries.map((entry, i) => (
-        <Paper key={i} withBorder p="xs" mb="sm">
+        <Paper 
+          key={i} 
+          withBorder 
+          p="xs" 
+          mb="sm"
+          style={{
+            borderColor: colorScheme === 'dark' 
+              ? 'var(--mantine-color-dark-4)' 
+              : 'var(--mantine-color-gray-3)',
+          }}
+        >
           <Group justify="space-between" align="center">
             <Group gap="xs">
               <Text size="sm" c="dimmed" fw={500} style={{ minWidth: "40px" }}>
@@ -65,7 +86,9 @@ export function CooldownList({
                   borderRadius: "4px",
                   backgroundColor:
                     expandedEntry === i
-                      ? "var(--mantine-color-blue-0)"
+                      ? colorScheme === 'dark' 
+                        ? 'var(--mantine-color-blue-9)' 
+                        : 'var(--mantine-color-blue-0)'
                       : "transparent",
                   transition: "background-color 0.2s ease",
                 }}
@@ -122,7 +145,16 @@ export function CooldownList({
           </Collapse>
         </Paper>
       ))}
-      <Button onClick={onDownload}>Download XML</Button>
+      <Button 
+        onClick={onDownload}
+        style={{
+          backgroundColor: colorScheme === 'dark' 
+            ? 'var(--mantine-color-green-8)' 
+            : 'var(--mantine-color-green-6)',
+        }}
+      >
+        Download XML
+      </Button>
     </Stack>
   );
 }

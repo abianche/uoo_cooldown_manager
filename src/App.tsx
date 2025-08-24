@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { CooldownEntry } from "./types";
 import { parseCooldowns, buildCooldowns } from "./xmlUtils";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,13 +12,21 @@ import {
   deleteEntry,
   reorderEntries,
 } from "./store";
-import { Container, Title, Stack } from "@mantine/core";
+import {
+  Container,
+  Title,
+  Stack,
+  ActionIcon,
+  useMantineColorScheme,
+  Group,
+} from "@mantine/core";
 import { CooldownList, FileUpload } from "./components";
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
   const data = useSelector((state: RootState) => state.cooldowns.data);
   const error = useSelector((state: RootState) => state.cooldowns.error);
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   useEffect(() => {
     fetch("/cooldowns.xml")
@@ -72,9 +80,35 @@ export default function App() {
   };
 
   return (
-    <Container p="md">
+    <Container
+      p="md"
+      style={{
+        minHeight: "100vh",
+        backgroundColor:
+          colorScheme === "dark"
+            ? "var(--mantine-color-dark-8)"
+            : "var(--mantine-color-gray-0)",
+        transition: "background-color 0.2s ease",
+      }}
+    >
       <Stack>
-        <Title order={1}>UOO Cooldown Manager</Title>
+        <Group justify="space-between" align="center">
+          <Title order={1}>UOO Cooldown Manager</Title>
+          <ActionIcon
+            onClick={() => toggleColorScheme()}
+            variant="outline"
+            size="lg"
+            aria-label="Toggle color scheme"
+            style={{
+              borderColor:
+                colorScheme === "dark"
+                  ? "var(--mantine-color-dark-4)"
+                  : "var(--mantine-color-gray-4)",
+            }}
+          >
+            {colorScheme === "dark" ? "☀️" : "🌙"}
+          </ActionIcon>
+        </Group>
         <FileUpload onFileSelect={handleFile} error={error} />
         {data && (
           <CooldownList

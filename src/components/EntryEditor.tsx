@@ -10,6 +10,7 @@ import {
   Text,
   Collapse,
   ActionIcon,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { CooldownEntry, Trigger } from "../types";
 
@@ -21,6 +22,7 @@ interface EntryEditorProps {
 
 export function EntryEditor({ entry, onChange, onDelete }: EntryEditorProps) {
   const [triggersOpen, setTriggersOpen] = useState(false);
+  const { colorScheme } = useMantineColorScheme();
   const update = (patch: Partial<CooldownEntry>) =>
     onChange({ ...entry, ...patch });
 
@@ -75,6 +77,11 @@ export function EntryEditor({ entry, onChange, onDelete }: EntryEditorProps) {
             variant="subtle"
             onClick={() => setTriggersOpen(!triggersOpen)}
             aria-label={triggersOpen ? "Collapse triggers" : "Expand triggers"}
+            style={{
+              color: colorScheme === 'dark' 
+                ? 'var(--mantine-color-gray-3)' 
+                : 'var(--mantine-color-gray-6)',
+            }}
           >
             {triggersOpen ? "▼" : "▶"}
           </ActionIcon>
