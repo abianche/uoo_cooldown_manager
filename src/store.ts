@@ -1,5 +1,5 @@
-import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Cooldowns, CooldownEntry } from './types';
+import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Cooldowns, CooldownEntry } from "./types";
 
 interface CooldownState {
   data: Cooldowns | null;
@@ -12,7 +12,7 @@ const initialState: CooldownState = {
 };
 
 const cooldownSlice = createSlice({
-  name: 'cooldowns',
+  name: "cooldowns",
   initialState,
   reducers: {
     setData(state, action: PayloadAction<Cooldowns>) {
@@ -25,26 +25,48 @@ const cooldownSlice = createSlice({
     addEntry(state) {
       if (!state.data) return;
       state.data.cooldowns.cooldownentry.push({
-        name: '',
+        name: "",
         defaultcooldown: 0,
-        cooldownbartype: 'Regular',
+        cooldownbartype: "Regular",
         hue: 0,
         hidewheninactive: true,
         trigger: [],
       });
     },
-    updateEntry(state, action: PayloadAction<{ index: number; entry: CooldownEntry }>) {
+    updateEntry(
+      state,
+      action: PayloadAction<{ index: number; entry: CooldownEntry }>
+    ) {
       if (!state.data) return;
-      state.data.cooldowns.cooldownentry[action.payload.index] = action.payload.entry;
+      state.data.cooldowns.cooldownentry[action.payload.index] =
+        action.payload.entry;
     },
     deleteEntry(state, action: PayloadAction<number>) {
       if (!state.data) return;
       state.data.cooldowns.cooldownentry.splice(action.payload, 1);
     },
+    reorderEntries(
+      state,
+      action: PayloadAction<{ fromIndex: number; toIndex: number }>
+    ) {
+      if (!state.data) return;
+      const { fromIndex, toIndex } = action.payload;
+      const entries = [...state.data.cooldowns.cooldownentry];
+      const [movedEntry] = entries.splice(fromIndex, 1);
+      entries.splice(toIndex, 0, movedEntry);
+      state.data.cooldowns.cooldownentry = entries;
+    },
   },
 });
 
-export const { setData, setError, addEntry, updateEntry, deleteEntry } = cooldownSlice.actions;
+export const {
+  setData,
+  setError,
+  addEntry,
+  updateEntry,
+  deleteEntry,
+  reorderEntries,
+} = cooldownSlice.actions;
 
 export const store = configureStore({
   reducer: {

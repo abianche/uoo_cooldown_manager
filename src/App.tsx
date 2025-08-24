@@ -10,6 +10,7 @@ import {
   addEntry,
   updateEntry,
   deleteEntry,
+  reorderEntries,
 } from "./store";
 import { Container, Title, Stack } from "@mantine/core";
 import { CooldownList, FileUpload } from "./components";
@@ -55,6 +56,9 @@ export default function App() {
 
   const onDeleteEntry = (index: number) => dispatch(deleteEntry(index));
 
+  const onReorderEntries = (fromIndex: number, toIndex: number) =>
+    dispatch(reorderEntries({ fromIndex, toIndex }));
+
   const download = () => {
     if (!data) return;
     const xml = buildCooldowns(data);
@@ -78,6 +82,7 @@ export default function App() {
             onAddEntry={onAddEntry}
             onUpdateEntry={onUpdateEntry}
             onDeleteEntry={onDeleteEntry}
+            onReorderEntries={onReorderEntries}
             onDownload={download}
           />
         )}
