@@ -67,8 +67,10 @@ export function EntryEditor({
 }: Readonly<EntryEditorProps>) {
   const [triggersOpen, setTriggersOpen] = useState(false);
   const { colorScheme } = useMantineColorScheme();
-  const update = (patch: Partial<CooldownEntry>) =>
+
+  const update = (patch: Partial<CooldownEntry>) => {
     onChange({ ...entry, ...patch });
+  };
 
   const updateTrigger = (index: number, trigger: Trigger) => {
     const triggers = [...entry.trigger];
@@ -76,16 +78,18 @@ export function EntryEditor({
     update({ trigger: triggers });
   };
 
-  const addTrigger = () =>
+  const addTrigger = () => {
     update({
       trigger: [
         ...entry.trigger,
         { triggertype: "SysMessage", duration: 0, triggertext: "" },
       ],
     });
+  };
 
-  const deleteTrigger = (index: number) =>
+  const deleteTrigger = (index: number) => {
     update({ trigger: entry.trigger.filter((_, i) => i !== index) });
+  };
 
   return (
     <Stack>

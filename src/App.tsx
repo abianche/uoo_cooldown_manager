@@ -41,7 +41,7 @@ export default function App() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [dispatch]);
 
   const handleFile = (file: File) => {
     const reader = new FileReader();
