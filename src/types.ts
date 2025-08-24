@@ -7,10 +7,30 @@ export const TriggerSchema = z.object({
 });
 export type Trigger = z.infer<typeof TriggerSchema>;
 
+export const COOLDOWN_BAR_TYPES = [
+  "Regular",
+  "Bandage",
+  "Criminal",
+  "PvP",
+  "WeaponSwing",
+  "Walk",
+] as const;
+
+export const CooldownBarTypeSchema = z.enum(COOLDOWN_BAR_TYPES);
+export type CooldownBarType = z.infer<typeof CooldownBarTypeSchema>;
+
 export const CooldownEntrySchema = z.object({
   name: z.string(),
   defaultcooldown: z.coerce.number().optional().default(0),
-  cooldownbartype: z.string(),
+  cooldownbartype: z
+    .string()
+    .transform((val) => {
+      if (COOLDOWN_BAR_TYPES.includes(val as any)) {
+        return val as CooldownBarType;
+      }
+      return "Regular" as CooldownBarType;
+    })
+    .default("Regular"),
   hue: z.coerce.number().optional().default(0),
   hidewheninactive: z.coerce.boolean().optional().default(false),
   trigger: z

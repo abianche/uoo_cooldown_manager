@@ -11,8 +11,28 @@ import {
   Collapse,
   ActionIcon,
   useMantineColorScheme,
+  Select,
 } from "@mantine/core";
-import { CooldownEntry, Trigger } from "../types";
+import { CooldownEntry, Trigger, COOLDOWN_BAR_TYPES } from "../types";
+
+function getCooldownBarTypeDescription(type: string): string {
+  switch (type) {
+    case "Regular":
+      return "Standard cooldown bar for general abilities";
+    case "Bandage":
+      return "Cooldown bar specifically for healing/bandaging";
+    case "Criminal":
+      return "Cooldown bar for criminal activities";
+    case "PvP":
+      return "Cooldown bar for player vs player actions";
+    case "WeaponSwing":
+      return "Cooldown bar for weapon attacks";
+    case "Walk":
+      return "Cooldown bar for movement abilities";
+    default:
+      return "Unknown cooldown bar type";
+  }
+}
 
 interface EntryEditorProps {
   entry: CooldownEntry;
@@ -55,10 +75,26 @@ export function EntryEditor({ entry, onChange, onDelete }: EntryEditorProps) {
         value={entry.defaultcooldown}
         onChange={(value) => update({ defaultcooldown: Number(value) })}
       />
-      <TextInput
+      <Select
         label="Cooldown Bar Type"
+        description="Choose the type of cooldown bar for this entry"
+        data={COOLDOWN_BAR_TYPES.map((type) => ({
+          value: type,
+          label: type,
+          description: getCooldownBarTypeDescription(type),
+        }))}
         value={entry.cooldownbartype}
-        onChange={(e) => update({ cooldownbartype: e.currentTarget.value })}
+        onChange={(value) => {
+          if (value) {
+            update({
+              cooldownbartype: value as (typeof COOLDOWN_BAR_TYPES)[number],
+            });
+          }
+        }}
+        allowDeselect={false}
+        searchable
+        clearable={false}
+        maxDropdownHeight={200}
       />
       <NumberInput
         label="Hue"
@@ -78,9 +114,10 @@ export function EntryEditor({ entry, onChange, onDelete }: EntryEditorProps) {
             onClick={() => setTriggersOpen(!triggersOpen)}
             aria-label={triggersOpen ? "Collapse triggers" : "Expand triggers"}
             style={{
-              color: colorScheme === 'dark' 
-                ? 'var(--mantine-color-gray-3)' 
-                : 'var(--mantine-color-gray-6)',
+              color:
+                colorScheme === "dark"
+                  ? "var(--mantine-color-gray-3)"
+                  : "var(--mantine-color-gray-6)",
             }}
           >
             {triggersOpen ? "▼" : "▶"}
