@@ -63,7 +63,7 @@ export function CooldownList({
       )}
       {entries.map((entry, i) => (
         <Paper
-          key={i}
+          key={`${entry.name}-${i}`}
           withBorder
           p="xs"
           mb="sm"
