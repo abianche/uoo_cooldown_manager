@@ -1,5 +1,5 @@
-import React from "react";
 import { Container, Stack, useMantineColorScheme } from "@mantine/core";
+import React from "react";
 
 interface AppContainerProps {
   children: React.ReactNode;

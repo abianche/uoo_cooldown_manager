@@ -1,5 +1,5 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Cooldowns, CooldownEntry, GeneralSettings } from "./types";
+import { CooldownEntry, Cooldowns, GeneralSettings } from "./types";
 
 interface CooldownState {
   data: Cooldowns | null;

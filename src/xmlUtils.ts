@@ -1,14 +1,14 @@
-import { XMLParser, XMLBuilder } from 'fast-xml-parser';
-import { CooldownsSchema, Cooldowns } from './types';
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
+import { Cooldowns, CooldownsSchema } from "./types";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
-  attributeNamePrefix: '',
+  attributeNamePrefix: "",
 });
 
 const builder = new XMLBuilder({
   ignoreAttributes: false,
-  attributeNamePrefix: '',
+  attributeNamePrefix: "",
   format: true,
 });
 

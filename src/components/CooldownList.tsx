@@ -1,14 +1,14 @@
-import React, { useState } from "react";
 import {
-  Button,
-  Stack,
-  Group,
   ActionIcon,
-  Text,
-  Paper,
+  Button,
   Collapse,
+  Group,
+  Paper,
+  Stack,
+  Text,
   useMantineColorScheme,
 } from "@mantine/core";
+import { useState } from "react";
 import { CooldownEntry } from "../types";
 import { EntryEditor } from "./EntryEditor";
 
@@ -45,12 +45,13 @@ export function CooldownList({
 
   return (
     <Stack>
-      <Button 
+      <Button
         onClick={onAddEntry}
         style={{
-          backgroundColor: colorScheme === 'dark' 
-            ? 'var(--mantine-color-blue-8)' 
-            : 'var(--mantine-color-blue-6)',
+          backgroundColor:
+            colorScheme === "dark"
+              ? "var(--mantine-color-blue-8)"
+              : "var(--mantine-color-blue-6)",
         }}
       >
         Add Entry
@@ -61,15 +62,16 @@ export function CooldownList({
         </Text>
       )}
       {entries.map((entry, i) => (
-        <Paper 
-          key={i} 
-          withBorder 
-          p="xs" 
+        <Paper
+          key={i}
+          withBorder
+          p="xs"
           mb="sm"
           style={{
-            borderColor: colorScheme === 'dark' 
-              ? 'var(--mantine-color-dark-4)' 
-              : 'var(--mantine-color-gray-3)',
+            borderColor:
+              colorScheme === "dark"
+                ? "var(--mantine-color-dark-4)"
+                : "var(--mantine-color-gray-3)",
           }}
         >
           <Group justify="space-between" align="center">
@@ -86,9 +88,9 @@ export function CooldownList({
                   borderRadius: "4px",
                   backgroundColor:
                     expandedEntry === i
-                      ? colorScheme === 'dark' 
-                        ? 'var(--mantine-color-blue-9)' 
-                        : 'var(--mantine-color-blue-0)'
+                      ? colorScheme === "dark"
+                        ? "var(--mantine-color-blue-9)"
+                        : "var(--mantine-color-blue-0)"
                       : "transparent",
                   transition: "background-color 0.2s ease",
                 }}
@@ -145,12 +147,13 @@ export function CooldownList({
           </Collapse>
         </Paper>
       ))}
-      <Button 
+      <Button
         onClick={onDownload}
         style={{
-          backgroundColor: colorScheme === 'dark' 
-            ? 'var(--mantine-color-green-8)' 
-            : 'var(--mantine-color-green-6)',
+          backgroundColor:
+            colorScheme === "dark"
+              ? "var(--mantine-color-green-8)"
+              : "var(--mantine-color-green-6)",
         }}
       >
         Download XML

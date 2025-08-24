@@ -1,5 +1,4 @@
-import React from "react";
-import { FileInput, Alert } from "@mantine/core";
+import { Alert, FileInput } from "@mantine/core";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;

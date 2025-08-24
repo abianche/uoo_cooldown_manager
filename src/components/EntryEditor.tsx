@@ -1,22 +1,22 @@
-import React, { useState } from "react";
 import {
+  ActionIcon,
   Button,
-  Paper,
-  TextInput,
-  NumberInput,
   Checkbox,
+  Collapse,
   Group,
+  NumberInput,
+  Paper,
+  Select,
   Stack,
   Text,
-  Collapse,
-  ActionIcon,
+  TextInput,
   useMantineColorScheme,
-  Select,
 } from "@mantine/core";
+import { useState } from "react";
 import {
+  COOLDOWN_BAR_TYPES,
   CooldownEntry,
   Trigger,
-  COOLDOWN_BAR_TYPES,
   TRIGGER_TYPES,
 } from "../types";
 

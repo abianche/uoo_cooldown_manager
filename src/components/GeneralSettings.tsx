@@ -1,15 +1,15 @@
-import React, { useState } from "react";
 import {
+  ActionIcon,
+  Checkbox,
+  Collapse,
+  Group,
+  NumberInput,
   Paper,
   Stack,
   Text,
-  Checkbox,
-  NumberInput,
-  Group,
   useMantineColorScheme,
-  Collapse,
-  ActionIcon,
 } from "@mantine/core";
+import { useState } from "react";
 import { GeneralSettings } from "../types";
 
 interface GeneralSettingsProps {

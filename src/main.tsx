@@ -1,11 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { Provider } from "react-redux";
-import { store } from "./store";
 import { MantineProvider, createTheme } from "@mantine/core";
 import "@mantine/core/styles.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import App from "./App";
 import "./fonts.css";
+import { store } from "./store";
 
 const theme = createTheme({
   primaryColor: "blue",

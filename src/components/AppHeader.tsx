@@ -1,5 +1,10 @@
-import React from "react";
-import { Title, Group, Badge, ActionIcon, useMantineColorScheme } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Group,
+  Title,
+  useMantineColorScheme,
+} from "@mantine/core";
 
 export function AppHeader() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();

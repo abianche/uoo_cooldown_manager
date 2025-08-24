@@ -1,26 +1,26 @@
-import React, { useEffect } from "react";
-import { CooldownEntry } from "./types";
-import { parseCooldowns, buildCooldowns } from "./xmlUtils";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  RootState,
-  AppDispatch,
-  setData,
-  setError,
-  addEntry,
-  updateEntry,
-  deleteEntry,
-  reorderEntries,
-  updateGeneralSettings,
-  initializeData,
-} from "./store";
-import {
+  AppContainer,
+  AppHeader,
   CooldownList,
   FileUpload,
   GeneralSettingsPanel,
-  AppHeader,
-  AppContainer,
 } from "./components";
+import {
+  addEntry,
+  AppDispatch,
+  deleteEntry,
+  initializeData,
+  reorderEntries,
+  RootState,
+  setData,
+  setError,
+  updateEntry,
+  updateGeneralSettings,
+} from "./store";
+import { CooldownEntry } from "./types";
+import { buildCooldowns, parseCooldowns } from "./xmlUtils";
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
