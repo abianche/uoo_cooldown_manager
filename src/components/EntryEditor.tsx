@@ -123,9 +123,6 @@ export function EntryEditor({ entry, onChange, onDelete }: EntryEditorProps) {
           </Button>
         </Collapse>
       </Stack>
-      <Button color="red" onClick={onDelete}>
-        Delete Entry
-      </Button>
     </Stack>
   );
 }

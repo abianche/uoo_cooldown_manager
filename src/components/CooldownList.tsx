@@ -1,5 +1,13 @@
-import React from "react";
-import { Button, Stack, Group, ActionIcon, Text, Paper } from "@mantine/core";
+import React, { useState } from "react";
+import {
+  Button,
+  Stack,
+  Group,
+  ActionIcon,
+  Text,
+  Paper,
+  Collapse,
+} from "@mantine/core";
 import { CooldownEntry } from "../types";
 import { EntryEditor } from "./EntryEditor";
 
@@ -20,6 +28,8 @@ export function CooldownList({
   onReorderEntries,
   onDownload,
 }: CooldownListProps) {
+  const [expandedEntry, setExpandedEntry] = useState<number | null>(null);
+
   const moveEntry = (fromIndex: number, direction: "up" | "down") => {
     const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
     if (toIndex >= 0 && toIndex < entries.length) {
@@ -27,24 +37,51 @@ export function CooldownList({
     }
   };
 
+  const toggleEntry = (index: number) => {
+    setExpandedEntry(expandedEntry === index ? null : index);
+  };
+
   return (
     <Stack>
       <Button onClick={onAddEntry}>Add Entry</Button>
       {entries.length > 0 && (
         <Text size="sm" c="dimmed" ta="center">
-          Use the ↑↓ arrows to reorder entries
+          Click on an entry name to edit, use arrows to reorder
         </Text>
       )}
       {entries.map((entry, i) => (
-        <Paper key={i} withBorder p="xs" mb="md">
-          <Group justify="space-between" align="center" mb="xs">
-            <Text size="sm" c="dimmed" fw={500}>
-              Entry {i + 1}
-            </Text>
+        <Paper key={i} withBorder p="xs" mb="sm">
+          <Group justify="space-between" align="center">
+            <Group gap="xs">
+              <Text size="sm" c="dimmed" fw={500} style={{ minWidth: "40px" }}>
+                {i + 1}.
+              </Text>
+              <Text
+                fw={500}
+                style={{
+                  cursor: "pointer",
+                  flex: 1,
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  backgroundColor:
+                    expandedEntry === i
+                      ? "var(--mantine-color-blue-0)"
+                      : "transparent",
+                  transition: "background-color 0.2s ease",
+                }}
+                onClick={() => toggleEntry(i)}
+                c={expandedEntry === i ? "blue" : undefined}
+              >
+                {entry.name || "Unnamed Entry"}
+              </Text>
+              <Text size="sm" c="dimmed" style={{ marginRight: "8px" }}>
+                {expandedEntry === i ? "▼" : "▶"}
+              </Text>
+            </Group>
             <Group gap="xs">
               <ActionIcon
-                variant="light"
-                color="blue"
+                variant="subtle"
+                color="gray"
                 onClick={() => moveEntry(i, "up")}
                 disabled={i === 0}
                 aria-label="Move entry up"
@@ -53,8 +90,8 @@ export function CooldownList({
                 ↑
               </ActionIcon>
               <ActionIcon
-                variant="light"
-                color="blue"
+                variant="subtle"
+                color="gray"
                 onClick={() => moveEntry(i, "down")}
                 disabled={i === entries.length - 1}
                 aria-label="Move entry down"
@@ -62,13 +99,27 @@ export function CooldownList({
               >
                 ↓
               </ActionIcon>
+              <ActionIcon
+                variant="subtle"
+                color="red"
+                onClick={() => onDeleteEntry(i)}
+                aria-label="Delete entry"
+                size="sm"
+              >
+                ×
+              </ActionIcon>
             </Group>
           </Group>
-          <EntryEditor
-            entry={entry}
-            onChange={(val) => onUpdateEntry(i, val)}
-            onDelete={() => onDeleteEntry(i)}
-          />
+
+          <Collapse in={expandedEntry === i}>
+            <div style={{ marginTop: "1rem" }}>
+              <EntryEditor
+                entry={entry}
+                onChange={(val) => onUpdateEntry(i, val)}
+                onDelete={() => onDeleteEntry(i)}
+              />
+            </div>
+          </Collapse>
         </Paper>
       ))}
       <Button onClick={onDownload}>Download XML</Button>
