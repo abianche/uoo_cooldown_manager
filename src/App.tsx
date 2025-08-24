@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Button } from "@mantine/core";
 import {
   AppContainer,
   AppHeader,
@@ -8,24 +9,22 @@ import {
   GeneralSettingsPanel,
 } from "./components";
 import {
-  addEntry,
   AppDispatch,
-  deleteEntry,
   initializeData,
-  reorderEntries,
   RootState,
   setData,
   setError,
-  updateEntry,
-  updateGeneralSettings,
 } from "./store";
-import { CooldownEntry } from "./types";
+import { CooldownEntry, Cooldowns } from "./types";
 import { buildCooldowns, parseCooldowns } from "./xmlUtils";
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const data = useSelector((state: RootState) => state.cooldowns.data);
+  const storeData = useSelector((state: RootState) => state.cooldowns.data);
   const error = useSelector((state: RootState) => state.cooldowns.error);
+
+  const [localData, setLocalData] = useState<Cooldowns | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     fetch("/uoo_cooldown_manager/cooldowns.xml")
@@ -43,6 +42,13 @@ export default function App() {
       .catch(() => {});
   }, [dispatch]);
 
+  useEffect(() => {
+    if (storeData) {
+      setLocalData(storeData);
+      setHasChanges(false);
+    }
+  }, [storeData]);
+
   const handleFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -58,22 +64,95 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  const onAddEntry = () => dispatch(addEntry());
+  const onAddEntry = () => {
+    if (!localData) return;
+    const newEntry: CooldownEntry = {
+      name: "",
+      defaultcooldown: 0,
+      cooldownbartype: "Regular",
+      hue: 0,
+      hidewheninactive: true,
+      trigger: [],
+    };
+    const generalsettings =
+      localData.cooldowns.generalsettings || {
+        showCooldownGump: true,
+        cooldownBarHeight: 20,
+        cooldownBarWidth: 200,
+      };
+    setLocalData({
+      cooldowns: {
+        generalsettings,
+        cooldownentry: [...localData.cooldowns.cooldownentry, newEntry],
+      },
+    });
+    setHasChanges(true);
+  };
 
-  const onUpdateEntry = (index: number, entry: CooldownEntry) =>
-    dispatch(updateEntry({ index, entry }));
+  const onUpdateEntry = (index: number, entry: CooldownEntry) => {
+    if (!localData) return;
+    const entries = [...localData.cooldowns.cooldownentry];
+    entries[index] = entry;
+    setLocalData({
+      cooldowns: {
+        ...localData.cooldowns,
+        cooldownentry: entries,
+      },
+    });
+    setHasChanges(true);
+  };
 
-  const onDeleteEntry = (index: number) => dispatch(deleteEntry(index));
+  const onDeleteEntry = (index: number) => {
+    if (!localData) return;
+    const entries = [...localData.cooldowns.cooldownentry];
+    entries.splice(index, 1);
+    setLocalData({
+      cooldowns: {
+        ...localData.cooldowns,
+        cooldownentry: entries,
+      },
+    });
+    setHasChanges(true);
+  };
 
-  const onReorderEntries = (fromIndex: number, toIndex: number) =>
-    dispatch(reorderEntries({ fromIndex, toIndex }));
+  const onReorderEntries = (fromIndex: number, toIndex: number) => {
+    if (!localData) return;
+    const entries = [...localData.cooldowns.cooldownentry];
+    const [movedEntry] = entries.splice(fromIndex, 1);
+    entries.splice(toIndex, 0, movedEntry);
+    setLocalData({
+      cooldowns: {
+        ...localData.cooldowns,
+        cooldownentry: entries,
+      },
+    });
+    setHasChanges(true);
+  };
 
-  const onUpdateGeneralSettings = (settings: any) =>
-    dispatch(updateGeneralSettings(settings));
+  const onUpdateGeneralSettings = (settings: any) => {
+    if (!localData) return;
+    setLocalData({
+      cooldowns: {
+        ...localData.cooldowns,
+        generalsettings: {
+          ...localData.cooldowns.generalsettings,
+          ...settings,
+        },
+      },
+    });
+    setHasChanges(true);
+  };
+
+  const onSave = () => {
+    if (!localData) return;
+    dispatch(setData(localData));
+    dispatch(initializeData());
+    setHasChanges(false);
+  };
 
   const download = () => {
-    if (!data) return;
-    const xml = buildCooldowns(data);
+    if (!localData) return;
+    const xml = buildCooldowns(localData);
     const blob = new Blob([xml], { type: "application/xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -87,20 +166,28 @@ export default function App() {
     <AppContainer>
       <AppHeader />
       <FileUpload onFileSelect={handleFile} error={error} />
-      {data && (
+      {localData && (
         <>
           <GeneralSettingsPanel
-            settings={data.cooldowns.generalsettings}
+            settings={localData.cooldowns.generalsettings}
             onChange={onUpdateGeneralSettings}
           />
           <CooldownList
-            entries={data.cooldowns.cooldownentry}
+            entries={localData.cooldowns.cooldownentry}
             onAddEntry={onAddEntry}
             onUpdateEntry={onUpdateEntry}
             onDeleteEntry={onDeleteEntry}
             onReorderEntries={onReorderEntries}
             onDownload={download}
           />
+          {hasChanges && (
+            <Button
+              onClick={onSave}
+              style={{ position: "fixed", bottom: 20, right: 20 }}
+            >
+              Save Changes
+            </Button>
+          )}
         </>
       )}
     </AppContainer>

@@ -12,7 +12,7 @@ import {
   TextInput,
   useMantineColorScheme,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   COOLDOWN_BAR_TYPES,
   CooldownEntry,
@@ -62,45 +62,57 @@ interface EntryEditorProps {
 
 export function EntryEditor({
   entry,
-  onChange,
+  onChange, // kept in props, but unused if you're handling state locally
   onDelete,
 }: Readonly<EntryEditorProps>) {
+  const [entryState, setEntryState] = useState(entry);
   const [triggersOpen, setTriggersOpen] = useState(false);
   const { colorScheme } = useMantineColorScheme();
 
+  // keep local state in sync if parent changes the prop
+  useEffect(() => {
+    setEntryState(entry);
+  }, [entry]);
+
   const update = (patch: Partial<CooldownEntry>) => {
-    onChange({ ...entry, ...patch });
+    setEntryState((prev) => ({ ...prev, ...patch }));
   };
 
   const updateTrigger = (index: number, trigger: Trigger) => {
-    const triggers = [...entry.trigger];
-    triggers[index] = trigger;
-    update({ trigger: triggers });
-  };
-
-  const addTrigger = () => {
-    update({
-      trigger: [
-        ...entry.trigger,
-        { triggertype: "SysMessage", duration: 0, triggertext: "" },
-      ],
+    setEntryState((prev) => {
+      const triggers = [...prev.trigger];
+      triggers[index] = trigger;
+      return { ...prev, trigger: triggers };
     });
   };
 
+  const addTrigger = () => {
+    setEntryState((prev) => ({
+      ...prev,
+      trigger: [
+        ...prev.trigger,
+        { triggertype: "SysMessage", duration: 0, triggertext: "" },
+      ],
+    }));
+  };
+
   const deleteTrigger = (index: number) => {
-    update({ trigger: entry.trigger.filter((_, i) => i !== index) });
+    setEntryState((prev) => ({
+      ...prev,
+      trigger: prev.trigger.filter((_, i) => i !== index),
+    }));
   };
 
   return (
     <Stack>
       <TextInput
         label="Name"
-        value={entry.name}
+        value={entryState.name}
         onChange={(e) => update({ name: e.currentTarget.value })}
       />
       <NumberInput
         label="Default Cooldown"
-        value={entry.defaultcooldown}
+        value={entryState.defaultcooldown}
         onChange={(value) => update({ defaultcooldown: Number(value) })}
       />
       <Select
@@ -111,7 +123,7 @@ export function EntryEditor({
           label: type,
           description: getCooldownBarTypeDescription(type),
         }))}
-        value={entry.cooldownbartype}
+        value={entryState.cooldownbartype}
         onChange={(value) => {
           if (value) {
             update({
@@ -126,104 +138,108 @@ export function EntryEditor({
       />
       <NumberInput
         label="Hue"
-        value={entry.hue}
+        value={entryState.hue}
         onChange={(value) => update({ hue: Number(value) })}
       />
       <Checkbox
         label="Hide When Inactive"
-        checked={entry.hidewheninactive}
+        checked={entryState.hidewheninactive}
         onChange={(e) => update({ hidewheninactive: e.currentTarget.checked })}
       />
-      <Stack>
-        <Group justify="space-between" align="center">
-          <Text fw={500}>Triggers</Text>
-          <ActionIcon
-            variant="subtle"
-            onClick={() => setTriggersOpen(!triggersOpen)}
-            aria-label={triggersOpen ? "Collapse triggers" : "Expand triggers"}
-            style={{
-              color:
-                colorScheme === "dark"
-                  ? "var(--mantine-color-gray-3)"
-                  : "var(--mantine-color-gray-6)",
-            }}
-          >
-            {triggersOpen ? "▼" : "▶"}
-          </ActionIcon>
-        </Group>
-        <Collapse in={triggersOpen}>
-          {entry.trigger.map((t, i) => (
-            <Paper
-              key={`${t.triggertype}-${i}`}
-              withBorder
-              p="xs"
-              style={{ borderStyle: "dashed" }}
+      {entryState.cooldownbartype === "Regular" && (
+        <Stack>
+          <Group justify="space-between" align="center">
+            <Text fw={500}>Triggers</Text>
+            <ActionIcon
+              variant="subtle"
+              onClick={() => setTriggersOpen((o) => !o)}
+              aria-label={
+                triggersOpen ? "Collapse triggers" : "Expand triggers"
+              }
+              style={{
+                color:
+                  colorScheme === "dark"
+                    ? "var(--mantine-color-gray-3)"
+                    : "var(--mantine-color-gray-6)",
+              }}
             >
-              <Group gap="md" align="flex-end">
-                <Select
-                  label="Type"
-                  description="Choose the type of trigger"
-                  data={TRIGGER_TYPES.map((type) => ({
-                    value: type,
-                    label: type,
-                    description: getTriggerTypeDescription(type),
-                  }))}
-                  value={t.triggertype || "SysMessage"}
-                  onChange={(value) => {
-                    if (value) {
+              {triggersOpen ? "▼" : "▶"}
+            </ActionIcon>
+          </Group>
+          <Collapse in={triggersOpen}>
+            {entryState.trigger.map((t, i) => (
+              <Paper
+                key={i}
+                withBorder
+                p="xs"
+                style={{ borderStyle: "dashed" }}
+              >
+                <Group gap="md" align="flex-end">
+                  <Select
+                    label="Type"
+                    description="Choose the type of trigger"
+                    data={TRIGGER_TYPES.map((type) => ({
+                      value: type,
+                      label: type,
+                      description: getTriggerTypeDescription(type),
+                    }))}
+                    value={t.triggertype || "SysMessage"}
+                    onChange={(value) => {
+                      if (value) {
+                        updateTrigger(i, {
+                          ...t,
+                          triggertype: value as (typeof TRIGGER_TYPES)[number],
+                        });
+                      }
+                    }}
+                    allowDeselect={false}
+                    searchable
+                    clearable={false}
+                    maxDropdownHeight={200}
+                    style={{ minWidth: "200px" }}
+                  />
+                  <NumberInput
+                    label="Duration"
+                    description="Cooldown duration in seconds"
+                    placeholder="Duration"
+                    value={t.duration}
+                    onChange={(value) =>
+                      updateTrigger(i, { ...t, duration: Number(value) })
+                    }
+                    min={0}
+                    step={1}
+                    style={{ minWidth: "150px" }}
+                  />
+                  <TextInput
+                    label="Trigger Text"
+                    description="Text that triggers this cooldown"
+                    placeholder="Text"
+                    value={t.triggertext}
+                    onChange={(e) =>
                       updateTrigger(i, {
                         ...t,
-                        triggertype: value as (typeof TRIGGER_TYPES)[number],
-                      });
+                        triggertext: e.currentTarget.value,
+                      })
                     }
-                  }}
-                  allowDeselect={false}
-                  searchable
-                  clearable={false}
-                  maxDropdownHeight={200}
-                  style={{ minWidth: "200px" }}
-                />
-                <NumberInput
-                  label="Duration"
-                  description="Cooldown duration in seconds"
-                  placeholder="Duration"
-                  value={t.duration}
-                  onChange={(value) =>
-                    updateTrigger(i, { ...t, duration: Number(value) })
-                  }
-                  min={0}
-                  step={1}
-                  style={{ minWidth: "150px" }}
-                />
-                <TextInput
-                  label="Trigger Text"
-                  description="Text that triggers this cooldown"
-                  placeholder="Text"
-                  value={t.triggertext}
-                  onChange={(e) =>
-                    updateTrigger(i, {
-                      ...t,
-                      triggertext: e.currentTarget.value,
-                    })
-                  }
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  color="red"
-                  variant="subtle"
-                  onClick={() => deleteTrigger(i)}
-                  style={{ marginBottom: "4px" }}
-                >
-                  Delete
-                </Button>
-              </Group>
-            </Paper>
-          ))}
-          <Button variant="light" onClick={addTrigger}>
-            Add Trigger
-          </Button>
-        </Collapse>
-      </Stack>
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    color="red"
+                    variant="subtle"
+                    onClick={() => deleteTrigger(i)}
+                    style={{ marginBottom: "4px" }}
+                  >
+                    Delete
+                  </Button>
+                </Group>
+              </Paper>
+            ))}
+            <Button variant="light" onClick={addTrigger}>
+              Add Trigger
+            </Button>
+          </Collapse>
+        </Stack>
+      )}
     </Stack>
   );
 }
