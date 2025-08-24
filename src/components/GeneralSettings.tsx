@@ -20,7 +20,7 @@ interface GeneralSettingsProps {
 export function GeneralSettingsPanel({
   settings,
   onChange,
-}: GeneralSettingsProps) {
+}: Readonly<GeneralSettingsProps>) {
   const { colorScheme } = useMantineColorScheme();
   const [isExpanded, setIsExpanded] = useState(false);
 

@@ -5,7 +5,7 @@ interface AppContainerProps {
   children: React.ReactNode;
 }
 
-export function AppContainer({ children }: AppContainerProps) {
+export function AppContainer({ children }: Readonly<AppContainerProps>) {
   const { colorScheme } = useMantineColorScheme();
 
   return (

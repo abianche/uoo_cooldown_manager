@@ -28,7 +28,7 @@ export function CooldownList({
   onDeleteEntry,
   onReorderEntries,
   onDownload,
-}: CooldownListProps) {
+}: Readonly<CooldownListProps>) {
   const [expandedEntry, setExpandedEntry] = useState<number | null>(null);
   const { colorScheme } = useMantineColorScheme();
 

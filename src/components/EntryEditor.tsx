@@ -60,7 +60,11 @@ interface EntryEditorProps {
   onDelete: () => void;
 }
 
-export function EntryEditor({ entry, onChange, onDelete }: EntryEditorProps) {
+export function EntryEditor({
+  entry,
+  onChange,
+  onDelete,
+}: Readonly<EntryEditorProps>) {
   const [triggersOpen, setTriggersOpen] = useState(false);
   const { colorScheme } = useMantineColorScheme();
   const update = (patch: Partial<CooldownEntry>) =>

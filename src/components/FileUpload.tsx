@@ -5,7 +5,7 @@ interface FileUploadProps {
   error: string | null;
 }
 
-export function FileUpload({ onFileSelect, error }: FileUploadProps) {
+export function FileUpload({ onFileSelect, error }: Readonly<FileUploadProps>) {
   return (
     <>
       <FileInput
