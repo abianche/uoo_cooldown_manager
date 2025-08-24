@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-export const TriggerSchema = z.object({
-  triggertype: z.string(),
-  duration: z.coerce.number().optional().default(0),
-  triggertext: z.string(),
-});
-export type Trigger = z.infer<typeof TriggerSchema>;
-
 export const COOLDOWN_BAR_TYPES = [
   "Regular",
   "Bandage",
@@ -18,6 +11,31 @@ export const COOLDOWN_BAR_TYPES = [
 
 export const CooldownBarTypeSchema = z.enum(COOLDOWN_BAR_TYPES);
 export type CooldownBarType = z.infer<typeof CooldownBarTypeSchema>;
+
+export const TRIGGER_TYPES = [
+  "SysMessage",
+  "OverheadMessage",
+  "BuffAdded",
+  "BuffRemoved",
+] as const;
+
+export const TriggerTypeSchema = z.enum(TRIGGER_TYPES);
+export type TriggerType = z.infer<typeof TriggerTypeSchema>;
+
+export const TriggerSchema = z.object({
+  triggertype: z
+    .string()
+    .transform((val) => {
+      if (TRIGGER_TYPES.includes(val as any)) {
+        return val as TriggerType;
+      }
+      return "SysMessage" as TriggerType;
+    })
+    .default("SysMessage"),
+  duration: z.coerce.number().optional().default(0),
+  triggertext: z.string(),
+});
+export type Trigger = z.infer<typeof TriggerSchema>;
 
 export const CooldownEntrySchema = z.object({
   name: z.string(),
