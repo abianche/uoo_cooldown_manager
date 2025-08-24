@@ -31,7 +31,7 @@ export default function App() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   useEffect(() => {
-    fetch("/cooldowns.xml")
+    fetch("/uoo_cooldown_manager/cooldowns.xml")
       .then((res) => (res.ok ? res.text() : null))
       .then((xml) => {
         if (!xml) return;
@@ -100,7 +100,7 @@ export default function App() {
     >
       <Stack>
         <Group justify="space-between" align="center">
-          <Title order={1}>UOO Cooldown Manager</Title>
+          <Title order={1}>Outlands Cooldowns Manager</Title>
           <ActionIcon
             onClick={() => toggleColorScheme()}
             variant="outline"
