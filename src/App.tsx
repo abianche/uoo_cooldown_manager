@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { CooldownEntry } from "./types";
 import { parseCooldowns, buildCooldowns } from "./xmlUtils";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,20 +15,17 @@ import {
   initializeData,
 } from "./store";
 import {
-  Container,
-  Title,
-  Stack,
-  ActionIcon,
-  useMantineColorScheme,
-  Group,
-} from "@mantine/core";
-import { CooldownList, FileUpload, GeneralSettingsPanel } from "./components";
+  CooldownList,
+  FileUpload,
+  GeneralSettingsPanel,
+  AppHeader,
+  AppContainer,
+} from "./components";
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
   const data = useSelector((state: RootState) => state.cooldowns.data);
   const error = useSelector((state: RootState) => state.cooldowns.error);
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   useEffect(() => {
     fetch("/uoo_cooldown_manager/cooldowns.xml")
@@ -87,53 +84,25 @@ export default function App() {
   };
 
   return (
-    <Container
-      p="md"
-      style={{
-        minHeight: "100vh",
-        backgroundColor:
-          colorScheme === "dark"
-            ? "var(--mantine-color-dark-8)"
-            : "var(--mantine-color-gray-0)",
-        transition: "background-color 0.2s ease",
-      }}
-    >
-      <Stack>
-        <Group justify="space-between" align="center">
-          <Title order={1}>Outlands Cooldowns Manager</Title>
-          <ActionIcon
-            onClick={() => toggleColorScheme()}
-            variant="outline"
-            size="lg"
-            aria-label="Toggle color scheme"
-            style={{
-              borderColor:
-                colorScheme === "dark"
-                  ? "var(--mantine-color-dark-4)"
-                  : "var(--mantine-color-gray-4)",
-            }}
-          >
-            {colorScheme === "dark" ? "☀️" : "🌙"}
-          </ActionIcon>
-        </Group>
-        <FileUpload onFileSelect={handleFile} error={error} />
-        {data && (
-          <>
-            <GeneralSettingsPanel
-              settings={data.cooldowns.generalsettings}
-              onChange={onUpdateGeneralSettings}
-            />
-            <CooldownList
-              entries={data.cooldowns.cooldownentry}
-              onAddEntry={onAddEntry}
-              onUpdateEntry={onUpdateEntry}
-              onDeleteEntry={onDeleteEntry}
-              onReorderEntries={onReorderEntries}
-              onDownload={download}
-            />
-          </>
-        )}
-      </Stack>
-    </Container>
+    <AppContainer>
+      <AppHeader />
+      <FileUpload onFileSelect={handleFile} error={error} />
+      {data && (
+        <>
+          <GeneralSettingsPanel
+            settings={data.cooldowns.generalsettings}
+            onChange={onUpdateGeneralSettings}
+          />
+          <CooldownList
+            entries={data.cooldowns.cooldownentry}
+            onAddEntry={onAddEntry}
+            onUpdateEntry={onUpdateEntry}
+            onDeleteEntry={onDeleteEntry}
+            onReorderEntries={onReorderEntries}
+            onDownload={download}
+          />
+        </>
+      )}
+    </AppContainer>
   );
 }
