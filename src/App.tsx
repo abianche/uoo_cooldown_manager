@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@mantine/core";
 import {
   AppContainer,
@@ -8,22 +7,22 @@ import {
   FileUpload,
   GeneralSettingsPanel,
 } from "./components";
-import {
-  AppDispatch,
-  initializeData,
-  RootState,
-  setData,
-  setError,
-} from "./store";
 import { CooldownEntry, Cooldowns } from "./types";
 import { buildCooldowns, parseCooldowns } from "./xmlUtils";
 
-export default function App() {
-  const dispatch = useDispatch<AppDispatch>();
-  const storeData = useSelector((state: RootState) => state.cooldowns.data);
-  const error = useSelector((state: RootState) => state.cooldowns.error);
+function ensureGeneralSettings(data: Cooldowns) {
+  if (!data.cooldowns.generalsettings) {
+    data.cooldowns.generalsettings = {
+      showCooldownGump: true,
+      cooldownBarHeight: 20,
+      cooldownBarWidth: 200,
+    };
+  }
+}
 
+export default function App() {
   const [localData, setLocalData] = useState<Cooldowns | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -33,32 +32,27 @@ export default function App() {
         if (!xml) return;
         try {
           const parsed = parseCooldowns(xml);
-          dispatch(setData(parsed));
-          dispatch(initializeData());
+          ensureGeneralSettings(parsed);
+          setLocalData(parsed);
+          setHasChanges(false);
         } catch {
           /* ignore */
         }
       })
       .catch(() => {});
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (storeData) {
-      setLocalData(storeData);
-      setHasChanges(false);
-    }
-  }, [storeData]);
+  }, []);
 
   const handleFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const parsed = parseCooldowns(reader.result as string);
-        dispatch(setData(parsed));
-        dispatch(initializeData());
-        dispatch(setError(null));
+        ensureGeneralSettings(parsed);
+        setLocalData(parsed);
+        setError(null);
+        setHasChanges(false);
       } catch (e) {
-        dispatch(setError("Failed to parse XML"));
+        setError("Failed to parse XML");
       }
     };
     reader.readAsText(file);
@@ -145,8 +139,6 @@ export default function App() {
 
   const onSave = () => {
     if (!localData) return;
-    dispatch(setData(localData));
-    dispatch(initializeData());
     setHasChanges(false);
   };
 
@@ -164,7 +156,7 @@ export default function App() {
 
   return (
     <AppContainer>
-      <AppHeader />
+      <AppHeader data={localData} />
       <FileUpload onFileSelect={handleFile} error={error} />
       {localData && (
         <>
