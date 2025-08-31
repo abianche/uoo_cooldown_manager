@@ -1,11 +1,11 @@
 import {
   ActionIcon,
   Button,
-  Collapse,
   Group,
   Paper,
   Stack,
   Text,
+  Transition,
   useMantineColorScheme,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ export function CooldownList({
   onDownload,
 }: Readonly<CooldownListProps>) {
   const [entriesState, setEntriesState] = useState(entries);
-  const [expandedEntry, setExpandedEntry] = useState<number | null>(null);
+  const [editingEntry, setEditingEntry] = useState<number | null>(null);
   const { colorScheme } = useMantineColorScheme();
 
   // keep local state in sync if parent swaps the prop
@@ -52,161 +52,139 @@ export function CooldownList({
     // keep parent informed (e.g., to persist)
     onReorderEntries(fromIndex, toIndex);
 
-    // keep the same item expanded after reordering
-    setExpandedEntry((prevExpanded) => {
-      if (prevExpanded === null) return prevExpanded;
-      if (prevExpanded === fromIndex) return toIndex;
-      if (fromIndex < prevExpanded && toIndex >= prevExpanded) {
-        return prevExpanded - 1;
-      }
-      if (fromIndex > prevExpanded && toIndex <= prevExpanded) {
-        return prevExpanded + 1;
-      }
-      return prevExpanded;
-    });
-  };
-
-  const toggleEntry = (index: number) => {
-    setExpandedEntry((prev) => (prev === index ? null : index));
   };
 
   const deleteEntryLocal = (index: number) => {
     setEntriesState((prev) => prev.filter((_, i) => i !== index));
     onDeleteEntry(index);
-    setExpandedEntry((prev) => {
-      if (prev === null) return prev;
-      if (index === prev) return null;
-      if (index < prev) return prev - 1;
-      return prev;
-    });
   };
 
   return (
     <Stack>
-      <Button
-        onClick={onAddEntry}
-        style={{
-          backgroundColor:
-            colorScheme === "dark"
-              ? "var(--mantine-color-blue-8)"
-              : "var(--mantine-color-blue-6)",
-        }}
-      >
-        Add Entry
-      </Button>
+      <Transition mounted={editingEntry === null} transition="slide-right" duration={200} timingFunction="ease">
+        {(styles) => (
+          <div style={styles}>
+            <Button
+              onClick={onAddEntry}
+              style={{
+                backgroundColor:
+                  colorScheme === "dark"
+                    ? "var(--mantine-color-blue-8)"
+                    : "var(--mantine-color-blue-6)",
+              }}
+            >
+              Add Entry
+            </Button>
 
-      {entriesState.length > 0 && (
-        <Text size="sm" c="dimmed" ta="center">
-          Click on an entry name to edit, use arrows to reorder
-        </Text>
-      )}
-
-      {entriesState.map((entry, i) => (
-        <Paper
-          key={i}
-          withBorder
-          p="xs"
-          mb="sm"
-          style={{
-            borderColor:
-              colorScheme === "dark"
-                ? "var(--mantine-color-dark-4)"
-                : "var(--mantine-color-gray-3)",
-          }}
-        >
-          <Group justify="space-between" align="center">
-            <Group gap="xs">
-              <Text size="sm" c="dimmed" fw={500} style={{ minWidth: "40px" }}>
-                {i + 1}.
-              </Text>
-              <Text
-                fw={500}
+            {entriesState.map((entry, i) => (
+              <Paper
+                key={i}
+                withBorder
+                p="xs"
+                mb="sm"
                 style={{
-                  cursor: "pointer",
-                  flex: 1,
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  backgroundColor:
-                    expandedEntry === i
-                      ? colorScheme === "dark"
-                        ? "var(--mantine-color-blue-9)"
-                        : "var(--mantine-color-blue-0)"
-                      : "transparent",
-                  transition: "background-color 0.2s ease",
+                  borderColor:
+                    colorScheme === "dark"
+                      ? "var(--mantine-color-dark-4)"
+                      : "var(--mantine-color-gray-3)",
                 }}
-                onClick={() => toggleEntry(i)}
-                c={expandedEntry === i ? "blue" : undefined}
               >
-                {entry.name || "Unnamed Entry"}
-              </Text>
-              <Text size="sm" c="dimmed" style={{ marginRight: "8px" }}>
-                {expandedEntry === i ? "▼" : "▶"}
-              </Text>
-            </Group>
-            <Group gap="xs">
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                onClick={() => moveEntry(i, "up")}
-                disabled={i === 0}
-                aria-label="Move entry up"
-                size="sm"
-              >
-                ↑
-              </ActionIcon>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                onClick={() => moveEntry(i, "down")}
-                disabled={i === entriesState.length - 1}
-                aria-label="Move entry down"
-                size="sm"
-              >
-                ↓
-              </ActionIcon>
-              <ActionIcon
-                variant="subtle"
-                color="red"
-                onClick={() => deleteEntryLocal(i)}
-                aria-label="Delete entry"
-                size="sm"
-              >
-                ×
-              </ActionIcon>
-            </Group>
-          </Group>
+                <Group justify="space-between" align="center">
+                  <Group gap="xs">
+                    <Text size="sm" c="dimmed" fw={500} style={{ minWidth: "40px" }}>
+                      {i + 1}.
+                    </Text>
+                    <Text fw={500}>{entry.name || "Unnamed Entry"}</Text>
+                  </Group>
+                  <Group gap="xs">
+                    <ActionIcon
+                      variant="subtle"
+                      color="blue"
+                      onClick={() => setEditingEntry(i)}
+                      aria-label="Edit entry"
+                      size="sm"
+                    >
+                      →
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={() => moveEntry(i, "up")}
+                      disabled={i === 0}
+                      aria-label="Move entry up"
+                      size="sm"
+                    >
+                      ↑
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={() => moveEntry(i, "down")}
+                      disabled={i === entriesState.length - 1}
+                      aria-label="Move entry down"
+                      size="sm"
+                    >
+                      ↓
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      onClick={() => deleteEntryLocal(i)}
+                      aria-label="Delete entry"
+                      size="sm"
+                    >
+                      ×
+                    </ActionIcon>
+                  </Group>
+                </Group>
+              </Paper>
+            ))}
 
-          <Collapse in={expandedEntry === i}>
-            <div style={{ marginTop: "1rem" }}>
+            <Button
+              onClick={onDownload}
+              style={{
+                backgroundColor:
+                  colorScheme === "dark"
+                    ? "var(--mantine-color-green-8)"
+                    : "var(--mantine-color-green-6)",
+              }}
+            >
+              Download XML
+            </Button>
+          </div>
+        )}
+      </Transition>
+
+      {editingEntry !== null && (
+        <Transition mounted transition="slide-left" duration={200} timingFunction="ease">
+          {(styles) => (
+            <div style={styles}>
+              <Button
+                mb="sm"
+                onClick={() => setEditingEntry(null)}
+                variant="subtle"
+              >
+                ← Back
+              </Button>
               <EntryEditor
-                entry={entry}
-                // keep parent informed, but render from local state
+                entry={entriesState[editingEntry]}
                 onChange={(val) => {
                   setEntriesState((prev) => {
                     const next = [...prev];
-                    next[i] = val;
+                    next[editingEntry] = val;
                     return next;
                   });
-                  onUpdateEntry(i, val);
+                  onUpdateEntry(editingEntry, val);
                 }}
-                onDelete={() => deleteEntryLocal(i)}
+                onDelete={() => {
+                  deleteEntryLocal(editingEntry);
+                  setEditingEntry(null);
+                }}
               />
             </div>
-          </Collapse>
-        </Paper>
-      ))}
-
-      <Button
-        onClick={onDownload}
-        style={{
-          backgroundColor:
-            colorScheme === "dark"
-              ? "var(--mantine-color-green-8)"
-              : "var(--mantine-color-green-6)",
-        }}
-      >
-        Download XML
-      </Button>
+          )}
+        </Transition>
+      )}
     </Stack>
   );
 }
