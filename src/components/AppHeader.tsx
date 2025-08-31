@@ -7,15 +7,17 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { Cooldowns } from "../types";
 import { buildCooldowns } from "../xmlUtils";
 import { XMLViewer } from "./XMLViewer";
 
-export function AppHeader() {
+interface AppHeaderProps {
+  data: Cooldowns | null;
+}
+
+export function AppHeader({ data }: Readonly<AppHeaderProps>) {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const [opened, { open, close }] = useDisclosure();
-  const data = useSelector((state: RootState) => state.cooldowns.data);
 
   const handleViewRawXML = () => {
     open();
